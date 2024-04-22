@@ -45,8 +45,28 @@
         return cdf;
     }
 
+    const outputResults = (type, indexes, users, conversions, adNames) => {
+        const results = calculateStatisticalSignificance(
+            users[indexes[0]],
+            conversions[indexes[0]],
+            users[indexes[1]],
+            conversions[indexes[1]],
+        );
+    
+        if (results.pValue < 0.05) {
+            if (results.zScore < 0) {
+                alert(`${type} p-value: ${results.pValue.toFixed(3)}. Ad "${adNames[indexes[0]]}" is better than ad "${adNames[indexes[1]]}"`)
+            } else {
+                alert(`${type} p-value: ${results.pValue.toFixed(3)}. Ad "${adNames[indexes[1]]}" is better than ad "${adNames[indexes[0]]}"`)
+            }
+        } else {
+            alert(`${type} p-value: ${results.pValue.toFixed(3)}. No significant difference.`)
+        }
+    }
+
     const impressions = getNums('baseMetrics.impressions')
     const clicks = getNums('baseMetrics.clicks')
+    const engagements = getNums('baseMetrics.totalEngagements')
     const names = [...document.querySelectorAll('.ads-table__table tbody .reporting-table-creatives__creative-name')].map(elem => elem.innerText.slice('Name: '.length))
     const ids = [...document.querySelectorAll('.ads-table__table tbody [data-live-test-creative-id]')].map(elem => elem.getAttribute('data-live-test-creative-id'))
 
@@ -56,20 +76,6 @@
         throw new Error('Must select exactly two ads');
     }
 
-    const results = calculateStatisticalSignificance(
-        impressions[selectedIndexes[0]],
-        clicks[selectedIndexes[0]],
-        impressions[selectedIndexes[1]],
-        clicks[selectedIndexes[1]],
-    );
-
-    if (results.pValue < 0.05) {
-        if (results.zScore < 0) {
-            alert(`p-value: ${results.pValue.toFixed(3)}. Ad "${names[selectedIndexes[0]]}" is better than ad "${names[selectedIndexes[1]]}"`)
-        } else {
-            alert(`p-value: ${results.pValue.toFixed(3)}. Ad "${names[selectedIndexes[1]]}" is better than ad "${names[selectedIndexes[0]]}"`)
-        }
-    } else {
-        alert(`p-value: ${results.pValue.toFixed(3)}. No significant difference.`)
-    }
+    outputResults('clicks', selectedIndexes, impressions, clicks, names)
+    outputResults('engagement', selectedIndexes, impressions, engagements, names)
 }
